@@ -21,6 +21,7 @@ public class Model
 	private final Map<Integer, Match> matchesIdMap;
 	
 	private Map<Team, Integer> teamsTable;
+	private final Simulator simulator;
 	
 	
 	public Model()
@@ -28,6 +29,7 @@ public class Model
 		this.dao = new PremierLeagueDAO();
 		this.teamsIdMap = new HashMap<>();	
 		this.matchesIdMap = new HashMap<>();
+		this.simulator = new Simulator();
 	}
 	
 	public void createGraph()
@@ -121,7 +123,7 @@ public class Model
 	public int getNumVertices() { return this.graph.vertexSet().size(); }
 	public int getNumEdges() { return this.graph.edgeSet().size(); }
 
-	public Map<Team, Double> getBetterTeamsOf(Team selectedTeam)
+	public Map<Team, Double> getBetterTeamsDiffOf(Team selectedTeam)
 	{
 		Map<Team, Double> betterTeams = new HashMap<>();
 		
@@ -137,7 +139,7 @@ public class Model
 		return betterTeams;
 	}
 
-	public Map<Team, Double> getWorseTeamsOf(Team selectedTeam)
+	public Map<Team, Double> getWorseTeamsDiffOf(Team selectedTeam)
 	{
 		Map<Team, Double> worseTeams = new HashMap<>();
 		
@@ -151,5 +153,16 @@ public class Model
 		}
 
 		return worseTeams;
+	}
+	
+	public SimulationResult runSimulation(int numReportersPerTeam, int reportersMinimumPerMatch)
+	{
+		if(this.graph == null) return null;
+		
+		this.simulator.initialize(this.graph, this.teamsIdMap, 
+				this.matchesIdMap.values(), numReportersPerTeam, reportersMinimumPerMatch);
+		
+		SimulationResult result = this.simulator.run();
+		return result;
 	}
 }

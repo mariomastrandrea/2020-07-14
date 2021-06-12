@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.PremierLeague.model.Model;
+import it.polito.tdp.PremierLeague.model.SimulationResult;
 import it.polito.tdp.PremierLeague.model.Team;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -78,8 +79,8 @@ public class FXMLController
     		return;
     	}
     	
-    	Map<Team, Double> betterTeams = this.model.getBetterTeamsOf(selectedTeam);
-    	Map<Team, Double> worseTeams = this.model.getWorseTeamsOf(selectedTeam);
+    	Map<Team, Double> betterTeams = this.model.getBetterTeamsDiffOf(selectedTeam);
+    	Map<Team, Double> worseTeams = this.model.getWorseTeamsDiffOf(selectedTeam);
     	
     	List<Team> orderedBetterTeams = new ArrayList<>(betterTeams.keySet());
     	List<Team> orderedWorseTeams = new ArrayList<>(worseTeams.keySet());
@@ -120,7 +121,69 @@ public class FXMLController
     @FXML
     void doSimula(ActionEvent event) 
     {
-
+    	String numReportersInput = this.txtN.getText();
+    	
+    	if(numReportersInput == null)
+    	{
+    		this.txtResult.setText("Errore: devi prima inserire un valore intero di N!");
+    		return;
+    	}
+    	
+    	int numReporters;
+    	
+    	try
+		{
+			numReporters = Integer.parseInt(numReportersInput);
+		}
+		catch(NumberFormatException nfe)
+		{
+			this.txtResult.setText("Errore di formato: inserire un valore intero di N!");
+    		return;
+		}
+    	
+    	if(numReporters <= 0)
+    	{
+    		this.txtResult.setText("Errore di formato: inserire un valore positivo di N!");
+    		return;
+    	}
+    	
+    	String numMinReportersInput = this.txtX.getText();
+    	
+    	if(numMinReportersInput == null)
+    	{
+    		this.txtResult.setText("Errore: devi prima inserire un valore intero di X!");
+    		return;
+    	}
+    	
+    	int numMinReporters;
+    	
+    	try
+		{
+    		numMinReporters = Integer.parseInt(numMinReportersInput);
+		}
+		catch(NumberFormatException nfe)
+		{
+			this.txtResult.setText("Errore di formato: inserire un valore intero di X!");
+    		return;
+		}
+    	
+    	if(numMinReporters <= 0)
+    	{
+    		this.txtResult.setText("Errore di formato: inserire un valore positivo di X!");
+    		return;
+    	}
+    	
+    	SimulationResult result = this.model.runSimulation(numReporters, numMinReporters);
+    	
+    	if(result == null)
+    	{
+    		this.txtResult.setText("Errore: devi prima creare il grafo!");
+    		return;
+    	}
+    	
+    	this.txtResult.setText(String.format(
+    	"Ad ogni partita hanno assistito in media: %.3f reporters\nIl numero di partite in cui il numero totale di reporters era minore di X(%d) è: %d partite",
+    	result.getReportersAvgPerMatch(), numMinReporters, result.getMatchesWithoutEnoughReporters()));
     }
 
     @FXML 
