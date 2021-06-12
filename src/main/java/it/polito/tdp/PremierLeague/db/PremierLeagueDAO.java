@@ -5,7 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import it.polito.tdp.PremierLeague.model.Action;
 import it.polito.tdp.PremierLeague.model.Match;
 import it.polito.tdp.PremierLeague.model.Player;
@@ -26,28 +31,6 @@ public class PremierLeagueDAO {
 				Player player = new Player(res.getInt("PlayerID"), res.getString("Name"));
 				
 				result.add(player);
-			}
-			conn.close();
-			return result;
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public List<Team> listAllTeams(){
-		String sql = "SELECT * FROM Teams";
-		List<Team> result = new ArrayList<Team>();
-		Connection conn = DBConnect.getConnection();
-
-		try {
-			PreparedStatement st = conn.prepareStatement(sql);
-			ResultSet res = st.executeQuery();
-			while (res.next()) {
-
-				Team team = new Team(res.getInt("TeamID"), res.getString("Name"));
-				result.add(team);
 			}
 			conn.close();
 			return result;
@@ -83,7 +66,8 @@ public class PremierLeagueDAO {
 		}
 	}
 	
-	public List<Match> listAllMatches(){
+	public List<Match> listAllMatches()
+	{
 		String sql = "SELECT m.MatchID, m.TeamHomeID, m.TeamAwayID, m.teamHomeFormation, m.teamAwayFormation, m.resultOfTeamHome, m.date, t1.Name, t2.Name   "
 				+ "FROM Matches m, Teams t1, Teams t2 "
 				+ "WHERE m.TeamHomeID = t1.TeamID AND m.TeamAwayID = t2.TeamID";
@@ -106,8 +90,83 @@ public class PremierLeagueDAO {
 			conn.close();
 			return result;
 			
-		} catch (SQLException e) {
+		} 
+		catch (SQLException e) 
+		{
 			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public Collection<Team> getAllTeams(Map<Integer, Team> teamsIdMap)
+	{
+		String sql = "SELECT * FROM Teams";
+		Set<Team> result = new HashSet<Team>();
+		Connection conn = DBConnect.getConnection();
+
+		try 
+		{
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) 
+			{
+				int teamId = res.getInt("TeamID");
+				
+				if(!teamsIdMap.containsKey(teamId))
+				{
+					Team newTeam = new Team(teamId, res.getString("Name"));
+					teamsIdMap.put(teamId, newTeam);
+				}
+				
+				result.add(teamsIdMap.get(teamId));
+			}
+			res.close();
+			st.close();
+			conn.close();
+			return result;
+		} 
+		catch (SQLException sqle) 
+		{
+			sqle.printStackTrace();
+			return null;
+		}
+	}
+
+	public Collection<Match> getAllMatches(Map<Integer, Match> matchesIdMap)
+	{
+		String sql = "SELECT m.MatchID, m.TeamHomeID, m.TeamAwayID, m.teamHomeFormation, m.teamAwayFormation, m.resultOfTeamHome, m.date, t1.Name, t2.Name   "
+				+ "FROM Matches m, Teams t1, Teams t2 "
+				+ "WHERE m.TeamHomeID = t1.TeamID AND m.TeamAwayID = t2.TeamID";
+		
+		Set<Match> result = new HashSet<Match>();
+		Connection conn = DBConnect.getConnection();
+
+		try 
+		{
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) 
+			{
+				int matchId = res.getInt("m.MatchID");
+				
+				if(!matchesIdMap.containsKey(matchId))
+				{
+					Match newMatch = new Match(matchId, res.getInt("m.TeamHomeID"), res.getInt("m.TeamAwayID"), res.getInt("m.teamHomeFormation"), 
+							res.getInt("m.teamAwayFormation"),res.getInt("m.resultOfTeamHome"), res.getTimestamp("m.date").toLocalDateTime(), res.getString("t1.Name"),res.getString("t2.Name"));
+					
+					matchesIdMap.put(matchId, newMatch);
+				}	
+				
+				result.add(matchesIdMap.get(matchId));
+			}
+			res.close();
+			st.close();
+			conn.close();
+			return result;
+		} 
+		catch (SQLException sqle) 
+		{
+			sqle.printStackTrace();
 			return null;
 		}
 	}

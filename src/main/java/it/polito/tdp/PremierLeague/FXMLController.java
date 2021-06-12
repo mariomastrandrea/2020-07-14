@@ -5,9 +5,13 @@
 package it.polito.tdp.PremierLeague;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.PremierLeague.model.Model;
+import it.polito.tdp.PremierLeague.model.Team;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -15,54 +19,113 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
-public class FXMLController {
-	
-	private Model model;
-
-    @FXML // ResourceBundle that was given to the FXMLLoader
+public class FXMLController 
+{	
+    @FXML 
     private ResourceBundle resources;
 
-    @FXML // URL location of the FXML file that was given to the FXMLLoader
+    @FXML 
     private URL location;
 
-    @FXML // fx:id="btnCreaGrafo"
-    private Button btnCreaGrafo; // Value injected by FXMLLoader
-
-    @FXML // fx:id="btnClassifica"
-    private Button btnClassifica; // Value injected by FXMLLoader
-
-    @FXML // fx:id="btnSimula"
-    private Button btnSimula; // Value injected by FXMLLoader
-
-    @FXML // fx:id="cmbSquadra"
-    private ComboBox<?> cmbSquadra; // Value injected by FXMLLoader
-
-    @FXML // fx:id="txtN"
-    private TextField txtN; // Value injected by FXMLLoader
-
-    @FXML // fx:id="txtX"
-    private TextField txtX; // Value injected by FXMLLoader
-
-    @FXML // fx:id="txtResult"
-    private TextArea txtResult; // Value injected by FXMLLoader
-
     @FXML
-    void doClassifica(ActionEvent event) {
+    private Button btnCreaGrafo;
 
+    @FXML 
+    private Button btnClassifica; 
+
+    @FXML 
+    private Button btnSimula; 
+
+    @FXML 
+    private ComboBox<Team> cmbSquadra;
+
+    @FXML 
+    private TextField txtN; 
+
+    @FXML 
+    private TextField txtX;
+
+    @FXML 
+    private TextArea txtResult;
+    
+	private Model model;
+
+	
+	@FXML
+    void doCreaGrafo(ActionEvent event) 
+    {
+		this.model.createGraph();
+		List<Team> allOrderedTeams = this.model.getAllOrderedTeams();
+		
+		this.cmbSquadra.getItems().clear();
+		this.cmbSquadra.getItems().addAll(allOrderedTeams);
+		
+		int numVertices = this.model.getNumVertices();
+		int numEdges = this.model.getNumEdges();
+		
+		this.txtResult.setText(
+				String.format("Grafo creato\n# Vertici: %d\n# Archi: %d", numVertices, numEdges));
     }
 
     @FXML
-    void doCreaGrafo(ActionEvent event) {
+    void doClassifica(ActionEvent event) 
+    {
+    	Team selectedTeam = this.cmbSquadra.getValue();
+    	
+    	if(selectedTeam == null) 
+    	{
+    		this.txtResult.setText("Errore: devi prima selezionare una squadra dal menù a tendina!");
+    		return;
+    	}
+    	
+    	Map<Team, Double> betterTeams = this.model.getBetterTeamsOf(selectedTeam);
+    	Map<Team, Double> worseTeams = this.model.getWorseTeamsOf(selectedTeam);
+    	
+    	List<Team> orderedBetterTeams = new ArrayList<>(betterTeams.keySet());
+    	List<Team> orderedWorseTeams = new ArrayList<>(worseTeams.keySet());
+    	
+    	orderedBetterTeams.sort((t1,t2) -> Double.compare(betterTeams.get(t1), betterTeams.get(t2)));
+    	orderedWorseTeams.sort((t1,t2) -> Double.compare(worseTeams.get(t1), worseTeams.get(t2)));
 
+    	
+    	StringBuilder sb = new StringBuilder();
+    	
+    	sb.append("SQUADRE MIGLIORI:\n");
+    	sb.append(this.printOrderedTeamsMap(betterTeams, orderedBetterTeams));
+    	
+    	sb.append("\n\nSQUADRE PEGGIORI:\n");
+    	sb.append(this.printOrderedTeamsMap(worseTeams, orderedWorseTeams));
+    	this.txtResult.setText(sb.toString());
+    }
+    
+    private String printOrderedTeamsMap(Map<Team, Double> map, List<Team> orderedTeams)
+    {
+    	if(map.isEmpty()) return "nessuna";
+    	
+    	StringBuilder sb = new StringBuilder();
+    	
+    	for(Team team : orderedTeams)
+    	{
+    		if(sb.length() > 0)
+    			sb.append("\n");
+    		
+    		double diff = map.get(team);
+    		
+    		sb.append("- ").append(team.toString()).append("(").append((int)diff).append(")");
+    	}
+    	
+    	return sb.toString();
     }
 
     @FXML
-    void doSimula(ActionEvent event) {
+    void doSimula(ActionEvent event) 
+    {
 
     }
 
-    @FXML // This method is called by the FXMLLoader when initialization is complete
-    void initialize() {
+    @FXML 
+    void initialize() 
+    {
         assert btnCreaGrafo != null : "fx:id=\"btnCreaGrafo\" was not injected: check your FXML file 'Scene.fxml'.";
         assert btnClassifica != null : "fx:id=\"btnClassifica\" was not injected: check your FXML file 'Scene.fxml'.";
         assert btnSimula != null : "fx:id=\"btnSimula\" was not injected: check your FXML file 'Scene.fxml'.";
@@ -72,7 +135,8 @@ public class FXMLController {
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Scene.fxml'.";
     }
     
-    public void setModel(Model model) {
+    public void setModel(Model model) 
+    {
     	this.model = model;
     }
 }
