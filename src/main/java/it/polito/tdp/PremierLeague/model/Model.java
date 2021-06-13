@@ -9,7 +9,7 @@ import java.util.Map;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+import org.jgrapht.graph.builder.GraphTypeBuilder;
 
 import it.polito.tdp.PremierLeague.db.PremierLeagueDAO;
 import it.polito.tdp.PremierLeague.simulation.SimulationResult;
@@ -36,7 +36,13 @@ public class Model
 	
 	public void createGraph()
 	{
-		this.graph = new SimpleDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+		this.graph = GraphTypeBuilder.<Team, DefaultWeightedEdge>directed()
+									.allowingMultipleEdges(false)
+									.allowingSelfLoops(false)
+									.weighted(true)
+									.edgeClass(DefaultWeightedEdge.class)
+									.buildGraph();
+		
 		this.teamsTable = new HashMap<>();
 		
 		//add vertices
