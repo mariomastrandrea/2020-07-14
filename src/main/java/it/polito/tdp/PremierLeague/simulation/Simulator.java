@@ -1,4 +1,4 @@
-package it.polito.tdp.PremierLeague.model;
+package it.polito.tdp.PremierLeague.simulation;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,6 +9,9 @@ import java.util.PriorityQueue;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultWeightedEdge;
+
+import it.polito.tdp.PremierLeague.model.Match;
+import it.polito.tdp.PremierLeague.model.Team;
 
 public class Simulator implements SimulationResult
 {

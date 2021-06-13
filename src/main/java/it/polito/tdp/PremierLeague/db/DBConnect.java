@@ -9,33 +9,35 @@ import com.zaxxer.hikari.HikariDataSource;
 public class DBConnect 
 {
 	private static final String jdbcURL = "jdbc:mariadb://localhost/PremierLeague";
-	private static HikariDataSource ds;
+	private static final HikariDataSource dataSource;
+	private static final String username = "root";
+	private static final String password = "root";
+
+	static 
+	{
+		HikariConfig configuration = new HikariConfig();
+		configuration.setJdbcUrl(jdbcURL);
+		configuration.setUsername(username);
+		configuration.setPassword(password);
+		
+		// MySQL configuration
+		configuration.addDataSourceProperty("cachePrepStmts", "true");
+		configuration.addDataSourceProperty("prepStmtCacheSize", "250");
+		configuration.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+		
+		dataSource = new HikariDataSource(configuration);
+	}
 	
 	public static Connection getConnection() 
-	{	
-		if (ds == null) 
-		{
-			HikariConfig config = new HikariConfig();
-			config.setJdbcUrl(jdbcURL);
-			config.setUsername("root");
-			config.setPassword("root");
-			
-			// configurazione MySQL
-			config.addDataSourceProperty("cachePrepStmts", "true");
-			config.addDataSourceProperty("prepStmtCacheSize", "250");
-			config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-			
-			ds = new HikariDataSource(config);
-		}
-		
+	{
 		try 
 		{	
-			return ds.getConnection();
+			return dataSource.getConnection();
 		} 
 		catch (SQLException e) 
 		{
-			System.err.println("Errore connessione al DB");
-			throw new RuntimeException(e);
+			System.err.println("Error DB connection at: " + jdbcURL);
+			throw new RuntimeException("Error DB connection at: " + jdbcURL, e);
 		}
 	}
 }

@@ -12,6 +12,8 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import it.polito.tdp.PremierLeague.db.PremierLeagueDAO;
+import it.polito.tdp.PremierLeague.simulation.SimulationResult;
+import it.polito.tdp.PremierLeague.simulation.Simulator;
 
 public class Model 
 {
@@ -38,12 +40,12 @@ public class Model
 		this.teamsTable = new HashMap<>();
 		
 		//add vertices
-		Collection<Team> allTeams = this.dao.getAllTeams(teamsIdMap);
+		Collection<Team> allTeams = this.dao.getAllTeams(this.teamsIdMap);
 		Graphs.addAllVertices(this.graph, allTeams);
 		allTeams.forEach(team -> this.teamsTable.put(team, 0));	// initialise teams table
 		
 		//retrieve all matches and compute teams table at the end of championship
-		Collection<Match> allMatches = this.dao.getAllMatches(matchesIdMap);
+		Collection<Match> allMatches = this.dao.getAllMatches(this.matchesIdMap);
 		
 		for(Match match : allMatches)
 		{
@@ -123,7 +125,7 @@ public class Model
 	public int getNumVertices() { return this.graph.vertexSet().size(); }
 	public int getNumEdges() { return this.graph.edgeSet().size(); }
 
-	public Map<Team, Double> getBetterTeamsDiffOf(Team selectedTeam)
+	public Map<Team, Double> getBetterTeamsMapOf(Team selectedTeam)
 	{
 		Map<Team, Double> betterTeams = new HashMap<>();
 		
@@ -139,7 +141,7 @@ public class Model
 		return betterTeams;
 	}
 
-	public Map<Team, Double> getWorseTeamsDiffOf(Team selectedTeam)
+	public Map<Team, Double> getWorseTeamsMapOf(Team selectedTeam)
 	{
 		Map<Team, Double> worseTeams = new HashMap<>();
 		

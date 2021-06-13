@@ -1,4 +1,4 @@
-package it.polito.tdp.PremierLeague.model;
+package it.polito.tdp.PremierLeague.simulation;
 
 public interface SimulationResult
 {
